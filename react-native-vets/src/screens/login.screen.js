@@ -1,5 +1,5 @@
 import { AuthenticationContext } from "../services/authentication.context";
-
+import { useState, useContext } from "react";
 import {
   AccountBackground,
   AccountBackgroundFilter,

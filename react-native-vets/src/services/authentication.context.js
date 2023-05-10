@@ -1,63 +1,68 @@
-import { useState, useContext } from "react";
+import React, { useState, createContext } from "react";
 
-import { AuthenticationContext } from "../services/authentication.context";
+import { loginRequest, createUserRequest } from "./authentication.service";
 
-import {
-  AccountBackground,
-  AccountBackgroundFilter,
-  AccountContainer,
-  AuthButton,
-  AuthInput,
-  ErrorContainer,
-  Loading,
-  LoadingContainer,
-  Title,
-} from "../theme/Styles";
-import { Text } from "../theme/typography";
+export const AuthenticationContext = createContext();
 
-export const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const authenticationContext = useContext(AuthenticationContext);
+export const AuthenticationContextProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  //const [user, setUser] = useState({ uid: 1, email: "user1@email.com" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const onLogin = (email, password) => {
+    setIsLoading(true);
+    setError(null);
+    setUser(null);
+    loginRequest(email, password)
+      .then((u) => {
+        setUser(u);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        setError(err);
+      });
+  };
+
+  const onRegister = (email, password, repeatedPassword) => {
+    setIsLoading(true);
+    setError(null);
+    setUser(null);
+    if (password !== repeatedPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+    createUserRequest(email, password)
+      .then((u) => {
+        setUser(u);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        setError(err);
+      });
+  };
+
+  const onLogout = () => {
+    setIsLoading(false);
+    setError(null);
+    setUser(null);
+  };
+
   return (
-    <AccountBackground>
-      <AccountBackgroundFilter>
-        <Title>Findvet</Title>
-        <AccountContainer>
-          <AuthInput
-            label="E-mail"
-            value={email}
-            autoCapitalize="none"
-            onChangeText={(u) => setEmail(u)}
-          />
-          <AuthInput
-            label="Password"
-            value={password}
-            secureTextEntry
-            autoCapitalize="none"
-            secure
-            onChangeText={(p) => setPassword(p)}
-          />
-          <ErrorContainer>
-            <Text variant="error">{authenticationContext.error}</Text>
-          </ErrorContainer>
-          <AuthButton
-            icon="login"
-            mode="contained"
-            onPress={() => authenticationContext.onLogin(email, password)}
-          >
-            LOGIN
-          </AuthButton>
-        </AccountContainer>
-        <AuthButton mode="contained" onPress={() => navigation.goBack()}>
-          Back
-        </AuthButton>
-        {authenticationContext.isLoading && (
-          <LoadingContainer>
-            <Loading />
-          </LoadingContainer>
-        )}
-      </AccountBackgroundFilter>
-    </AccountBackground>
+    <AuthenticationContext.Provider
+      value={{
+        user,
+        isLoading,
+        error,
+        onLogin,
+        onRegister,
+        onLogout,
+      }}
+    >
+      {children}
+    </AuthenticationContext.Provider>
   );
 };

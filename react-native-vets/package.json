@@ -36,7 +36,8 @@
     "react-native-svg": "12.3.0",
     "react-native-webview": "11.23.0",
     "styled-components": "^5.3.10",
-    "yarn": "^1.22.19"
+    "yarn": "^1.22.19",
+    "expo-updates": "~0.14.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
